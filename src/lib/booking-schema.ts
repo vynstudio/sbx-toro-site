@@ -15,10 +15,32 @@ export const MoveSize = z.enum([
 ]);
 export type MoveSize = z.infer<typeof MoveSize>;
 
+// Residence type at each endpoint — affects access / stairs / pricing
+export const ResidenceType = z.enum([
+  "house",
+  "apartment",
+  "townhome",
+  "storage",
+]);
+export type ResidenceType = z.infer<typeof ResidenceType>;
+
+// Floor only relevant for apartments — captured as a chip selection
+export const ApartmentFloor = z.enum(["1", "2", "3", "4", "5+"]);
+export type ApartmentFloor = z.infer<typeof ApartmentFloor>;
+
 export const QuoteSchema = z.object({
   helpType: HelpType,
-  fromZip: z.string().min(4).max(5),
-  toZip: z.string().min(4).max(5),
+
+  // FROM
+  fromAddress: z.string().min(3),
+  fromResidence: ResidenceType,
+  fromFloor: ApartmentFloor.optional(),
+
+  // TO
+  toAddress: z.string().min(3),
+  toResidence: ResidenceType,
+  toFloor: ApartmentFloor.optional(),
+
   size: MoveSize,
   date: z.string().min(1),
   specialItems: z.string().max(500).optional().default(""),
@@ -54,7 +76,22 @@ export const SIZE_LABEL: Record<MoveSize, { en: string; es: string }> = {
   partial: { en: "Partial / a few items", es: "Parcial / pocos artículos" },
 };
 
-// Compat alias so existing template booking-modal imports don't break during transition.
+export const RESIDENCE_LABEL: Record<ResidenceType, { en: string; es: string }> = {
+  house: { en: "House", es: "Casa" },
+  apartment: { en: "Apartment", es: "Apartamento" },
+  townhome: { en: "Townhome", es: "Townhome" },
+  storage: { en: "Storage unit", es: "Bodega / Storage" },
+};
+
+export const FLOOR_LABEL: Record<ApartmentFloor, { en: string; es: string }> = {
+  "1": { en: "1st floor", es: "Piso 1" },
+  "2": { en: "2nd floor", es: "Piso 2" },
+  "3": { en: "3rd floor", es: "Piso 3" },
+  "4": { en: "4th floor", es: "Piso 4" },
+  "5+": { en: "5+ (has elevator?)", es: "5+ (¿hay ascensor?)" },
+};
+
+// Compat aliases so any older imports don't break.
 export const SERVICE_LABEL: Record<HelpType, string> = {
   labor: "Labor only",
   "labor-truck": "Labor + Truck",

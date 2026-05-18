@@ -189,6 +189,10 @@ type ContentShape = {
     toQ: string;
     fromPh: string;
     toPh: string;
+    fromAddrLabel: string;
+    toAddrLabel: string;
+    residenceQ: string;
+    floorQ: string;
     sizeQ: string;
     dateQ: string;
     specialQ: string;
@@ -379,12 +383,16 @@ export const content: { en: ContentShape; es: ContentShape } = {
     quote: {
       title: "Free quote",
       sub: "60-second form. We respond the same day.",
-      stepLabels: ["Help", "Where", "Size", "Date", "You"],
+      stepLabels: ["Help", "From", "To", "Size", "Date", "You"],
       helpQ: "What kind of help do you need?",
-      fromQ: "From where?",
-      toQ: "Where to?",
-      fromPh: "ZIP code · e.g. 32801",
-      toPh: "ZIP code · e.g. 32789",
+      fromQ: "Where are you moving from?",
+      toQ: "Where are you moving to?",
+      fromPh: "Street address, city, FL",
+      toPh: "Street address, city, FL",
+      fromAddrLabel: "Pickup address",
+      toAddrLabel: "Drop-off address",
+      residenceQ: "What type of place?",
+      floorQ: "Which floor?",
       sizeQ: "How big is the move?",
       dateQ: "Preferred move date",
       specialQ: "Anything special we should know? (piano, art, narrow stairs, etc.)",
@@ -574,12 +582,16 @@ export const content: { en: ContentShape; es: ContentShape } = {
     quote: {
       title: "Cotización gratis",
       sub: "Formulario de 60 segundos. Respondemos el mismo día.",
-      stepLabels: ["Ayuda", "Dónde", "Tamaño", "Fecha", "Tú"],
+      stepLabels: ["Ayuda", "Desde", "Hasta", "Tamaño", "Fecha", "Tú"],
       helpQ: "¿Qué tipo de ayuda necesitas?",
-      fromQ: "¿Desde dónde?",
-      toQ: "¿A dónde?",
-      fromPh: "ZIP · ej. 32801",
-      toPh: "ZIP · ej. 32789",
+      fromQ: "¿Desde dónde te mudas?",
+      toQ: "¿A dónde te mudas?",
+      fromPh: "Calle, ciudad, FL",
+      toPh: "Calle, ciudad, FL",
+      fromAddrLabel: "Dirección de origen",
+      toAddrLabel: "Dirección de destino",
+      residenceQ: "¿Qué tipo de lugar?",
+      floorQ: "¿Qué piso?",
       sizeQ: "¿Qué tamaño tiene la mudanza?",
       dateQ: "Fecha preferida",
       specialQ: "¿Algo especial que debamos saber? (piano, arte, escaleras estrechas, etc.)",

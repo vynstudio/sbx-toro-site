@@ -6,14 +6,22 @@ import { useLang } from "./lang-provider";
 import {
   HELP_LABEL,
   SIZE_LABEL,
+  RESIDENCE_LABEL,
+  FLOOR_LABEL,
   type HelpType,
   type MoveSize,
+  type ResidenceType,
+  type ApartmentFloor,
 } from "@/lib/booking-schema";
 
 type FormData = {
   helpType: HelpType;
-  fromZip: string;
-  toZip: string;
+  fromAddress: string;
+  fromResidence: ResidenceType;
+  fromFloor?: ApartmentFloor;
+  toAddress: string;
+  toResidence: ResidenceType;
+  toFloor?: ApartmentFloor;
   size: MoveSize;
   date: string;
   specialItems: string;
@@ -25,8 +33,12 @@ type FormData = {
 
 const DEFAULT: FormData = {
   helpType: "labor-truck",
-  fromZip: "",
-  toZip: "",
+  fromAddress: "",
+  fromResidence: "house",
+  fromFloor: undefined,
+  toAddress: "",
+  toResidence: "house",
+  toFloor: undefined,
   size: "two-br",
   date: "",
   specialItems: "",
@@ -36,7 +48,24 @@ const DEFAULT: FormData = {
   phone: "",
 };
 
-const STEPS_COUNT = 5;
+const STEPS_COUNT = 6;
+
+const HELP_OPTIONS: HelpType[] = ["labor", "labor-truck", "hauling"];
+const SIZE_OPTIONS: MoveSize[] = [
+  "studio",
+  "one-br",
+  "two-br",
+  "three-br",
+  "four-plus",
+  "office",
+];
+const RESIDENCE_OPTIONS: ResidenceType[] = [
+  "house",
+  "apartment",
+  "townhome",
+  "storage",
+];
+const FLOOR_OPTIONS: ApartmentFloor[] = ["1", "2", "3", "4", "5+"];
 
 export function BookingModal() {
   const { open, setOpen } = useBooking();
@@ -82,8 +111,25 @@ export function BookingModal() {
   const update = <K extends keyof FormData>(key: K, value: FormData[K]) =>
     setData((d) => ({ ...d, [key]: value }));
 
-  const helpOptions: HelpType[] = ["labor", "labor-truck", "hauling"];
-  const sizeOptions: MoveSize[] = ["studio", "one-br", "two-br", "three-br", "four-plus", "office"];
+  // When residence changes away from apartment, drop the floor
+  const setResidence = (
+    which: "from" | "to",
+    value: ResidenceType,
+  ) => {
+    if (which === "from") {
+      setData((d) => ({
+        ...d,
+        fromResidence: value,
+        fromFloor: value === "apartment" ? d.fromFloor : undefined,
+      }));
+    } else {
+      setData((d) => ({
+        ...d,
+        toResidence: value,
+        toFloor: value === "apartment" ? d.toFloor : undefined,
+      }));
+    }
+  };
 
   return (
     <div
@@ -124,7 +170,7 @@ export function BookingModal() {
                 {t.quote.helpQ}
               </h3>
               <div className="choices">
-                {helpOptions.map((h) => (
+                {HELP_OPTIONS.map((h) => (
                   <div
                     key={h}
                     className={`choice${data.helpType === h ? " selected" : ""}`}
@@ -144,34 +190,62 @@ export function BookingModal() {
             </div>
           )}
 
-          {/* STEP 2 — From / To */}
+          {/* STEP 2 — FROM address + residence + floor */}
           {step === 2 && (
             <div>
               <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 20, marginBottom: 16 }}>
                 {t.quote.fromQ}
               </h3>
+              {/* TODO: wire Google Places autocomplete to this input when
+                  NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is provided. For now, the
+                  browser's saved-address autofill handles the same pattern
+                  via autoComplete="street-address". */}
               <div className="field">
-                <label>{t.quote.fromQ}</label>
+                <label>{t.quote.fromAddrLabel}</label>
                 <input
                   type="text"
-                  inputMode="numeric"
-                  maxLength={5}
+                  autoComplete="street-address"
+                  inputMode="text"
                   placeholder={t.quote.fromPh}
-                  value={data.fromZip}
-                  onChange={(e) => update("fromZip", e.target.value)}
+                  value={data.fromAddress}
+                  onChange={(e) => update("fromAddress", e.target.value)}
                 />
               </div>
+
               <div className="field">
-                <label>{t.quote.toQ}</label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={5}
-                  placeholder={t.quote.toPh}
-                  value={data.toZip}
-                  onChange={(e) => update("toZip", e.target.value)}
-                />
+                <label>{t.quote.residenceQ}</label>
+                <div className="size-grid" style={{ marginBottom: 0 }}>
+                  {RESIDENCE_OPTIONS.map((r) => (
+                    <button
+                      type="button"
+                      key={r}
+                      className={`size-chip${data.fromResidence === r ? " selected" : ""}`}
+                      onClick={() => setResidence("from", r)}
+                    >
+                      {RESIDENCE_LABEL[r][lang]}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {data.fromResidence === "apartment" && (
+                <div className="field">
+                  <label>{t.quote.floorQ}</label>
+                  <div className="size-grid" style={{ marginBottom: 0 }}>
+                    {FLOOR_OPTIONS.map((f) => (
+                      <button
+                        type="button"
+                        key={f}
+                        className={`size-chip${data.fromFloor === f ? " selected" : ""}`}
+                        onClick={() => update("fromFloor", f)}
+                      >
+                        {FLOOR_LABEL[f][lang]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="modal-actions">
                 <button type="button" className="btn-back" onClick={prev}>← {t.quote.back}</button>
                 <button type="button" className="btn btn-primary" onClick={next}>
@@ -181,14 +255,75 @@ export function BookingModal() {
             </div>
           )}
 
-          {/* STEP 3 — Size */}
+          {/* STEP 3 — TO address + residence + floor */}
           {step === 3 && (
+            <div>
+              <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 20, marginBottom: 16 }}>
+                {t.quote.toQ}
+              </h3>
+              <div className="field">
+                <label>{t.quote.toAddrLabel}</label>
+                <input
+                  type="text"
+                  autoComplete="street-address"
+                  inputMode="text"
+                  placeholder={t.quote.toPh}
+                  value={data.toAddress}
+                  onChange={(e) => update("toAddress", e.target.value)}
+                />
+              </div>
+
+              <div className="field">
+                <label>{t.quote.residenceQ}</label>
+                <div className="size-grid" style={{ marginBottom: 0 }}>
+                  {RESIDENCE_OPTIONS.map((r) => (
+                    <button
+                      type="button"
+                      key={r}
+                      className={`size-chip${data.toResidence === r ? " selected" : ""}`}
+                      onClick={() => setResidence("to", r)}
+                    >
+                      {RESIDENCE_LABEL[r][lang]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {data.toResidence === "apartment" && (
+                <div className="field">
+                  <label>{t.quote.floorQ}</label>
+                  <div className="size-grid" style={{ marginBottom: 0 }}>
+                    {FLOOR_OPTIONS.map((f) => (
+                      <button
+                        type="button"
+                        key={f}
+                        className={`size-chip${data.toFloor === f ? " selected" : ""}`}
+                        onClick={() => update("toFloor", f)}
+                      >
+                        {FLOOR_LABEL[f][lang]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="modal-actions">
+                <button type="button" className="btn-back" onClick={prev}>← {t.quote.back}</button>
+                <button type="button" className="btn btn-primary" onClick={next}>
+                  {t.quote.next} <span className="arrow" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4 — Size */}
+          {step === 4 && (
             <div>
               <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 20, marginBottom: 16 }}>
                 {t.quote.sizeQ}
               </h3>
               <div className="size-grid">
-                {sizeOptions.map((s) => (
+                {SIZE_OPTIONS.map((s) => (
                   <button
                     type="button"
                     key={s}
@@ -208,8 +343,8 @@ export function BookingModal() {
             </div>
           )}
 
-          {/* STEP 4 — Date + special */}
-          {step === 4 && (
+          {/* STEP 5 — Date + special items */}
+          {step === 5 && (
             <div>
               <div className="field">
                 <label>{t.quote.dateQ}</label>
@@ -236,8 +371,8 @@ export function BookingModal() {
             </div>
           )}
 
-          {/* STEP 5 — Contact + review + submit */}
-          {step === 5 && (
+          {/* STEP 6 — Contact + review + submit */}
+          {step === 6 && (
             <div>
               <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 20, marginBottom: 16 }}>
                 {t.quote.contactQ}
@@ -289,14 +424,36 @@ export function BookingModal() {
                 </div>
                 <div className="summary-row">
                   <span className="k">{t.quote.stepLabels[1]}</span>
-                  <span className="v">{data.fromZip || "—"} → {data.toZip || "—"}</span>
+                  <span className="v">
+                    {data.fromAddress || "—"}
+                    <br />
+                    <span style={{ fontSize: 12, color: "var(--muted)" }}>
+                      {RESIDENCE_LABEL[data.fromResidence][lang]}
+                      {data.fromResidence === "apartment" && data.fromFloor
+                        ? ` · ${FLOOR_LABEL[data.fromFloor][lang]}`
+                        : ""}
+                    </span>
+                  </span>
                 </div>
                 <div className="summary-row">
                   <span className="k">{t.quote.stepLabels[2]}</span>
-                  <span className="v">{SIZE_LABEL[data.size][lang]}</span>
+                  <span className="v">
+                    {data.toAddress || "—"}
+                    <br />
+                    <span style={{ fontSize: 12, color: "var(--muted)" }}>
+                      {RESIDENCE_LABEL[data.toResidence][lang]}
+                      {data.toResidence === "apartment" && data.toFloor
+                        ? ` · ${FLOOR_LABEL[data.toFloor][lang]}`
+                        : ""}
+                    </span>
+                  </span>
                 </div>
                 <div className="summary-row">
                   <span className="k">{t.quote.stepLabels[3]}</span>
+                  <span className="v">{SIZE_LABEL[data.size][lang]}</span>
+                </div>
+                <div className="summary-row">
+                  <span className="k">{t.quote.stepLabels[4]}</span>
                   <span className="v">{data.date || "—"}</span>
                 </div>
               </div>
