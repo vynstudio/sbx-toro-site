@@ -8,13 +8,13 @@ export function EditorialQuote() {
   return (
     <section className="block about" id="about">
       <div className="block-inner">
-        <div className="block-eyebrow">{t.about.eyebrow}</div>
-        <h2 className="block-h2">
+        <div className="block-eyebrow reveal">{t.about.eyebrow}</div>
+        <h2 className="block-h2 reveal reveal-d1">
           {t.about.head} <em>{t.about.headItalic}</em>
         </h2>
 
         <div className="about-grid">
-          <div className="about-body">
+          <div className="about-body reveal reveal-d2">
             {t.about.body.map((p, i) => (
               <p key={i}>{p}</p>
             ))}
@@ -28,7 +28,7 @@ export function EditorialQuote() {
               </a>
             </p>
           </div>
-          <ul className="about-bullets">
+          <ul className="about-bullets reveal reveal-d3">
             {t.about.bullets.map((b) => (
               <li key={b}>{b}</li>
             ))}

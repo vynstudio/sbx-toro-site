@@ -5,6 +5,7 @@ import "./globals.css";
 import { LangProvider } from "@/components/lang-provider";
 import { BookingProvider } from "@/components/booking-provider";
 import { BookingModal } from "@/components/booking-modal";
+import { RevealObserver } from "@/components/reveal-observer";
 import { SERVICE_CITIES } from "@/lib/content";
 import {
   PHONE_DISPLAY,
@@ -168,6 +169,7 @@ export default function RootLayout({
           <BookingProvider>
             {children}
             <BookingModal />
+            <RevealObserver />
           </BookingProvider>
         </LangProvider>
       </body>

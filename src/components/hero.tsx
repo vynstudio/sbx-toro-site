@@ -9,18 +9,18 @@ export function Hero() {
   return (
     <section className="hero">
       <div className="hero-inner">
-        <div className="hero-badge">
+        <div className="hero-badge reveal">
           <span className="stars" aria-hidden>★★★★★</span>
           {t.hero.badge}
         </div>
-        <h1>
+        <h1 className="reveal reveal-d1">
           {t.hero.h1Line1}
           <br />
           {t.hero.h1Line2}
           <span className="accent">{t.hero.h1Line3}</span>
         </h1>
-        <p className="hero-lede">{t.hero.lede}</p>
-        <div className="hero-cta-row">
+        <p className="hero-lede reveal reveal-d2">{t.hero.lede}</p>
+        <div className="hero-cta-row reveal reveal-d3">
           <RequestButton label={t.hero.ctaPrimary} />
           <a href={PHONE_TEL} className="btn btn-outline">
             {t.hero.ctaSecondary}

@@ -43,10 +43,12 @@ export function BookingModal() {
   const { t, lang } = useLang();
   const [step, setStep] = useState(1);
   const [data, setData] = useState<FormData>(DEFAULT);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (open) {
       setStep(1);
+      setSubmitting(false);
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -63,6 +65,7 @@ export function BookingModal() {
   const prev = () => setStep((s) => Math.max(s - 1, 1));
 
   const onSubmit = async () => {
+    setSubmitting(true);
     try {
       await fetch("/api/booking", {
         method: "POST",
@@ -72,6 +75,7 @@ export function BookingModal() {
     } catch {
       /* stub */
     }
+    setSubmitting(false);
     setStep(STEPS_COUNT + 1);
   };
 
@@ -297,8 +301,15 @@ export function BookingModal() {
                 </div>
               </div>
 
-              <button type="button" className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={onSubmit}>
-                {t.quote.confirm} <span className="arrow" />
+              <button
+                type="button"
+                className={`btn btn-primary${submitting ? " btn-loading" : ""}`}
+                style={{ width: "100%", justifyContent: "center" }}
+                onClick={onSubmit}
+                disabled={submitting}
+              >
+                {submitting ? (lang === "es" ? "Enviando..." : "Sending...") : t.quote.confirm}
+                {!submitting && <span className="arrow" />}
               </button>
 
               <div className="modal-actions">

@@ -20,8 +20,8 @@ export function FeatureQuote() {
         </div>
 
         <div className="reviews-grid">
-          {REVIEWS.map((r) => (
-            <article key={r.name} className="review-card">
+          {REVIEWS.map((r, i) => (
+            <article key={r.name} className={`review-card reveal${i % 3 === 1 ? " reveal-d1" : i % 3 === 2 ? " reveal-d2" : ""}`}>
               <div className="review-stars" aria-label="5 out of 5 stars">★★★★★</div>
               <p className="review-body">&ldquo;{r.body}&rdquo;</p>
               <div className="review-attr">

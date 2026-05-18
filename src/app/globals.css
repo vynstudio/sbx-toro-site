@@ -721,3 +721,73 @@ footer {
   .tier-title { font-size: 22px; }
   .modal-inner { padding: 24px 18px 22px; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .nav-phone-dot { animation: none; }
+}
+
+/* STATS BAND */
+.stats-band {
+  background: #fff;
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+  padding: 40px 20px;
+}
+@media (min-width: 720px) { .stats-band { padding: 56px 32px; } }
+.stats-band-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 32px 24px;
+}
+@media (min-width: 720px) {
+  .stats-band-inner { grid-template-columns: repeat(4, 1fr); gap: 24px; }
+}
+.stat {
+  text-align: center;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 8px;
+}
+.stat-value {
+  font-family: var(--font-serif), serif;
+  font-weight: 500;
+  font-size: clamp(34px, 5.2vw, 54px);
+  line-height: 1.0; letter-spacing: -0.02em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.stat-label {
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* TIER PREMIUM HOVER */
+.tier { position: relative; }
+.tier::after {
+  content: '';
+  position: absolute; inset: -1.5px;
+  border-radius: 12px;
+  pointer-events: none;
+  background: linear-gradient(135deg, transparent 30%, var(--red) 50%, transparent 70%);
+  background-size: 220% 220%;
+  background-position: 0% 0%;
+  opacity: 0;
+  transition: opacity 0.5s, background-position 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: -1;
+}
+.tier:hover::after { opacity: 0.18; background-position: 100% 100%; }
+
+/* LOADING STATE */
+.btn-loading { pointer-events: none; opacity: 0.92; }
+.btn-loading .arrow { display: none; }
+.btn-loading::before {
+  content: '';
+  width: 14px; height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: btnSpin 0.7s linear infinite;
+}
+@keyframes btnSpin { to { transform: rotate(360deg); } }
