@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLang } from "./lang-provider";
-import { RequestButton } from "./request-button";
+import Link from "next/link";
 import { PHONE_TEL } from "@/lib/contact";
 
 const SLIDES = [
@@ -23,7 +23,7 @@ const SLIDES = [
 const SLIDE_INTERVAL = 1500;
 
 export function Hero() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export function Hero() {
   }, []);
 
   return (
-    <section className="hero hero--media">
+    <section className="hero hero--media hero--home">
       <div className="hero-slides" aria-hidden>
         {SLIDES.map((src, i) => (
           <img
@@ -64,9 +64,11 @@ export function Hero() {
           {t.hero.h1Line2}
           <span className="accent">{t.hero.h1Line3}</span>
         </h1>
-        <p className="hero-lede reveal reveal-d2">{t.hero.lede}</p>
-        <div className="hero-cta-row reveal reveal-d3">
-          <RequestButton label={t.hero.ctaPrimary} />
+        <div className="hero-cta-row reveal reveal-d2">
+          <Link href="/quote" className="btn btn-primary">
+            {lang === "es" ? "Ver mi precio" : "Get my price"}
+            <span className="arrow" aria-hidden />
+          </Link>
           <a href={PHONE_TEL} className="btn btn-outline">
             {t.hero.ctaSecondary}
           </a>

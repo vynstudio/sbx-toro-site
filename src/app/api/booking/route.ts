@@ -25,31 +25,32 @@ export async function POST(req: Request) {
     body && typeof body.eventId === "string" ? body.eventId : undefined;
 
   const help = HELP_LABEL[q.helpType]?.en ?? q.helpType;
-  const fromRes = RESIDENCE_LABEL[q.fromResidence]?.en ?? q.fromResidence;
-  const toRes = RESIDENCE_LABEL[q.toResidence]?.en ?? q.toResidence;
+  const fromRes = q.fromResidence ? (RESIDENCE_LABEL[q.fromResidence]?.en ?? q.fromResidence) : "";
+  const toRes = q.toResidence ? (RESIDENCE_LABEL[q.toResidence]?.en ?? q.toResidence) : "";
   const fromFloor = q.fromFloor ? ` · ${FLOOR_LABEL[q.fromFloor]?.en ?? q.fromFloor}` : "";
   const toFloor = q.toFloor ? ` · ${FLOOR_LABEL[q.toFloor]?.en ?? q.toFloor}` : "";
   const size = q.size ? (SIZE_LABEL[q.size]?.en ?? q.size) : "—";
+  const fullName = `${q.firstName} ${q.lastName ?? ""}`.trim();
 
   // Plain-text summary reused by both notification channels.
   const text = [
     `🚚 New quote request — Toro Movers`,
     ``,
     `Service: ${help}`,
-    `Move date: ${q.date}`,
-    `From: ${q.fromAddress} (${fromRes}${fromFloor})`,
-    `To: ${q.toAddress} (${toRes}${toFloor})`,
+    `Move date: ${q.date || "—"}`,
+    `From: ${q.fromAddress}${fromRes ? ` (${fromRes}${fromFloor})` : ""}`,
+    `To: ${q.toAddress}${toRes ? ` (${toRes}${toFloor})` : ""}`,
     `Size: ${size}`,
     `Special items: ${q.specialItems || "—"}`,
     ``,
-    `${q.firstName} ${q.lastName}`,
+    fullName,
     `${q.email}`,
     `${q.phone}`,
   ].join("\n");
 
   // Notify (email + Telegram) and report the conversion to Meta in parallel.
   const results = await Promise.allSettled([
-    sendEmail(q, help, fromRes, toRes, fromFloor, toFloor, size, text),
+    sendEmail(q, help, fromRes, toRes, fromFloor, toFloor, size, fullName, text),
     sendTelegram(text, q),
     sendMetaCapi(q, eventId, req),
   ]);
@@ -72,6 +73,7 @@ async function sendEmail(
   fromFloor: string,
   toFloor: string,
   size: string,
+  fullName: string,
   text: string,
 ): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
@@ -89,18 +91,25 @@ async function sendEmail(
   const row = (label: string, value: string) =>
     `<tr><td style="padding:5px 14px 5px 0;color:#8a8a8a;font:13px/1.5 system-ui,sans-serif;vertical-align:top;white-space:nowrap">${label}</td><td style="padding:5px 0;color:#141414;font:14px/1.5 system-ui,sans-serif">${value || "—"}</td></tr>`;
 
+  const fromCell = fromRes
+    ? `${q.fromAddress}<br><span style="color:#8a8a8a">${fromRes}${fromFloor}</span>`
+    : q.fromAddress;
+  const toCell = toRes
+    ? `${q.toAddress}<br><span style="color:#8a8a8a">${toRes}${toFloor}</span>`
+    : q.toAddress;
+
   const html = `
   <div style="max-width:560px;margin:0 auto;padding:28px 24px;background:#ffffff">
     <h2 style="font:600 18px/1.3 system-ui,sans-serif;color:#141414;margin:0 0 4px">New quote request — Toro Movers</h2>
-    <p style="font:14px/1.5 system-ui,sans-serif;color:#6a6a6a;margin:0 0 22px">${q.firstName} ${q.lastName} just requested a quote.</p>
+    <p style="font:14px/1.5 system-ui,sans-serif;color:#6a6a6a;margin:0 0 22px">${fullName} just requested a quote.</p>
     <table style="border-collapse:collapse;width:100%">
       ${row("Service", help)}
-      ${row("Move date", q.date)}
-      ${row("From", `${q.fromAddress}<br><span style="color:#8a8a8a">${fromRes}${fromFloor}</span>`)}
-      ${row("To", `${q.toAddress}<br><span style="color:#8a8a8a">${toRes}${toFloor}</span>`)}
+      ${row("Move date", q.date || "—")}
+      ${row("From", fromCell)}
+      ${row("To", toCell)}
       ${row("Size", size)}
       ${row("Special items", q.specialItems || "—")}
-      ${row("Name", `${q.firstName} ${q.lastName}`)}
+      ${row("Name", fullName)}
       ${row("Email", `<a href="mailto:${q.email}" style="color:#c0392b">${q.email}</a>`)}
       ${row("Phone", `<a href="tel:${q.phone}" style="color:#c0392b">${q.phone}</a>`)}
     </table>
@@ -117,7 +126,7 @@ async function sendEmail(
         from: `Toro Movers <${from}>`,
         to: [to],
         reply_to: q.email,
-        subject: `New quote: ${q.firstName} ${q.lastName} · ${help}`,
+        subject: `New quote: ${fullName} · ${help}`,
         html,
         text,
       }),
@@ -194,8 +203,8 @@ async function sendMetaCapi(
     em: [sha256(q.email)],
     ph: [sha256(phone)],
     fn: [sha256(q.firstName)],
-    ln: [sha256(q.lastName)],
   };
+  if (q.lastName) userData.ln = [sha256(q.lastName)];
   const fbp = cookie(req, "_fbp");
   const fbc = cookie(req, "_fbc");
   if (fbp) userData.fbp = fbp;

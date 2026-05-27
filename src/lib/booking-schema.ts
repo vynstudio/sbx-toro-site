@@ -32,23 +32,23 @@ export const QuoteSchema = z.object({
   helpType: HelpType,
 
   // FROM
-  fromAddress: z.string().min(3),
-  fromResidence: ResidenceType,
+  fromAddress: z.string().min(2),
+  fromResidence: ResidenceType.optional(),
   fromFloor: ApartmentFloor.optional(),
 
   // TO
-  toAddress: z.string().min(3),
-  toResidence: ResidenceType,
+  toAddress: z.string().min(2),
+  toResidence: ResidenceType.optional(),
   toFloor: ApartmentFloor.optional(),
 
   // Size kept optional for backward-compat with /api/booking; no longer
   // asked in the form because the residence type + special items already
   // give us what we need to quote.
   size: MoveSize.optional(),
-  date: z.string().min(1),
+  date: z.string().min(1).optional(),
   specialItems: z.string().max(500).optional().default(""),
   firstName: z.string().min(1),
-  lastName: z.string().min(1),
+  lastName: z.string().optional().default(""),
   email: z.string().email(),
   phone: z.string().min(7),
 });

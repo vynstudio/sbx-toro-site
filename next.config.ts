@@ -9,7 +9,6 @@ const AD_LANDING_PATHS = [
   "/movers-orlando-lp",
   "/orlando-movers",
   "/loading-help",
-  "/quote",
   "/get-quote",
   "/lp",
   "/funnel",
