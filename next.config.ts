@@ -30,8 +30,6 @@ const nextConfig: NextConfig = {
         permanent: false,
       })),
       { source: "/quote-lp/:path*", destination: "/", permanent: false },
-      { source: "/ads/:path*", destination: "/", permanent: false },
-      { source: "/es/:path*", destination: "/", permanent: false },
     ];
   },
 };
