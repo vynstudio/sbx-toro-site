@@ -5,39 +5,52 @@ import { useLang } from "./lang-provider";
 import { RequestButton } from "./request-button";
 import { PHONE_TEL } from "@/lib/contact";
 
+const SLIDES = [
+  "/hero/slide-01.jpg",
+  "/hero/slide-02.jpg",
+  "/hero/slide-03.jpg",
+  "/hero/slide-04.jpg",
+  "/hero/slide-05.jpg",
+  "/hero/slide-06.jpg",
+  "/hero/slide-07.jpg",
+  "/hero/slide-08.jpg",
+  "/hero/slide-09.jpg",
+  "/hero/slide-10.jpg",
+  "/hero/slide-11.jpg",
+  "/hero/slide-12.jpg",
+  "/hero/slide-13.jpg",
+];
+const SLIDE_INTERVAL = 1500;
+
 export function Hero() {
   const { t } = useLang();
-  const [showVideo, setShowVideo] = useState(false);
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    // Tablet + desktop only — mobile keeps the still image to save data.
-    const mq = window.matchMedia("(min-width: 768px)");
-    const update = () => setShowVideo(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
+    // Respect reduced-motion: hold on the first image, no auto-advance.
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mq.matches) return;
+
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % SLIDES.length);
+    }, SLIDE_INTERVAL);
+    return () => clearInterval(id);
   }, []);
 
   return (
     <section className="hero hero--media">
-      <div
-        className="hero-bg-image"
-        style={{ backgroundImage: "url(/hero-poster.jpg)" }}
-        aria-hidden
-      />
-      {showVideo && (
-        <video
-          className="hero-video"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="metadata"
-          aria-hidden
-        >
-          <source src="/hero-video.mp4" type="video/mp4" />
-        </video>
-      )}
+      <div className="hero-slides" aria-hidden>
+        {SLIDES.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt=""
+            className={`hero-slide${i === index ? " is-active" : ""}`}
+            loading={i === 0 ? "eager" : "lazy"}
+            decoding="async"
+          />
+        ))}
+      </div>
       <div className="hero-overlay" aria-hidden />
 
       <div className="hero-inner">
