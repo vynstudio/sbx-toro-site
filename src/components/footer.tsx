@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useLang } from "./lang-provider";
+import { CITIES } from "@/lib/cities";
 import {
   PHONE_DISPLAY,
   PHONE_TEL,
@@ -47,6 +49,13 @@ export function Footer() {
             <a href="#areas">{t.nav.areas}</a>
             <a href="#reviews">{t.nav.reviews}</a>
             <a href="#faq">{t.nav.faq}</a>
+          </div>
+
+          <div className="footer-col">
+            <h4>{lang === "es" ? "Ciudades" : "Movers by city"}</h4>
+            {CITIES.map((c) => (
+              <Link key={c.slug} href={c.href}>{c.navLabel}</Link>
+            ))}
           </div>
         </div>
 

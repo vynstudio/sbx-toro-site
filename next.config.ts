@@ -5,14 +5,35 @@ import type { NextConfig } from "next";
 // paths to the homepage (which has the quote form) until dedicated LPs are
 // rebuilt. Temporary (307) on purpose — so swapping in real LPs later isn't
 // blocked by cached permanent redirects. Query strings (UTMs) are preserved.
+// "/orlando-movers" deliberately removed from this list — it is now a real
+// indexed SEO city page (see src/app/orlando-movers/).
 const AD_LANDING_PATHS = [
   "/movers-orlando-lp",
-  "/orlando-movers",
   "/loading-help",
   "/get-quote",
   "/lp",
   "/funnel",
   "/move-details",
+];
+
+// Older URL pattern (/movers-{city}) from a still-older version of the site.
+// 301-redirect to the now-canonical /{city}-movers pages so any backlinks
+// pointing at the old pattern transfer link equity.
+const CITY_LEGACY_REDIRECTS = [
+  { source: "/movers-orlando", destination: "/orlando-movers" },
+  { source: "/movers-lake-mary", destination: "/lake-mary-movers" },
+  { source: "/movers-winter-park", destination: "/winter-park-movers" },
+];
+
+// Legacy content pages from the prior site, now consolidated into homepage
+// sections. Redirect (temporary) so old indexed URLs don't 404 — can be
+// rebuilt as full pages later (like the /movers-{city} pages) if needed.
+const LEGACY_CONTENT = [
+  { source: "/apartment-moves", destination: "/#services" },
+  { source: "/home-moves", destination: "/#services" },
+  { source: "/commercial-moves", destination: "/#services" },
+  { source: "/about", destination: "/#about" },
+  { source: "/thank-you", destination: "/" },
 ];
 
 const nextConfig: NextConfig = {
@@ -29,6 +50,8 @@ const nextConfig: NextConfig = {
         permanent: false,
       })),
       { source: "/quote-lp/:path*", destination: "/", permanent: false },
+      ...LEGACY_CONTENT.map((r) => ({ ...r, permanent: false })),
+      ...CITY_LEGACY_REDIRECTS.map((r) => ({ ...r, permanent: true })),
     ];
   },
 };

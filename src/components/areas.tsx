@@ -1,7 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useLang } from "./lang-provider";
 import { AREAS_BY_COUNTY } from "@/lib/content";
+import { CITIES } from "@/lib/cities";
+
+// City names that have a dedicated SEO landing page.
+const CITY_HREF: Record<string, string> = Object.fromEntries(
+  CITIES.map((c) => [c.name, c.href]),
+);
 
 export function Areas() {
   const { t, lang } = useLang();
@@ -23,7 +30,13 @@ export function Areas() {
               </div>
               <ul>
                 {c.cities.map((city) => (
-                  <li key={city}>{city}</li>
+                  <li key={city}>
+                    {CITY_HREF[city] ? (
+                      <Link href={CITY_HREF[city]}>{city}</Link>
+                    ) : (
+                      city
+                    )}
+                  </li>
                 ))}
               </ul>
             </div>
